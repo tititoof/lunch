@@ -14,7 +14,7 @@ RSpec.describe 'Api::V1::Poll', type: :request do
 
   it '>> create' do
     place = FactoryBot.create(:place)
-    
+
     post api_v1_polls_create_path, params: { polls: {
       place_id: place.id,
       meal_id: place.meal.id
@@ -22,5 +22,17 @@ RSpec.describe 'Api::V1::Poll', type: :request do
 
     expect(response.status).to eq(200)
     expect(response).to match_response_schema('poll')
+  end
+
+  it '>> cannot create' do
+    place = FactoryBot.create(:place)
+    FactoryBot.create(:poll, user: @current_user, place:, meal: place.meal)
+
+    post api_v1_polls_create_path, params: { polls: {
+      place_id: place.id,
+      meal_id: place.meal.id
+    } }, headers: @auth_tokens
+
+    expect(response.status).to eq(422)
   end
 end

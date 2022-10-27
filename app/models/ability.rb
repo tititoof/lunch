@@ -33,5 +33,7 @@ class Ability
     can :write, Meal, user: user
 
     can :write, Place, user: user
+
+    can :write, Participate, user: user
   end
 end

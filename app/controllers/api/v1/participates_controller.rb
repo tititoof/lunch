@@ -19,10 +19,13 @@ module Api
 
       def destroy
         participate = Participate.find(params[:id])
+        authorize! :write, participate
 
         participate.destroy
 
         render json: ParticipateSerializer.new(participate)
+      rescue CanCan::AccessDenied => e
+        render json: e.message, status: :unprocessable_entity
       end
 
       private

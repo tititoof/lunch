@@ -24,7 +24,7 @@ RSpec.describe 'Api::V1::Participate', type: :request do
   end
 
   it '>> destroy' do
-    participate = FactoryBot.create(:participate)
+    participate = FactoryBot.create(:participate, user: @current_user)
 
     expect do
       delete "/api/v1/participates/#{participate.id}", headers: @auth_tokens
@@ -32,5 +32,13 @@ RSpec.describe 'Api::V1::Participate', type: :request do
 
     expect(response.status).to eq(200)
     expect(response).to match_response_schema('participate')
+  end
+
+  it '>> cannot destroy' do
+    participate = FactoryBot.create(:participate)
+
+    delete "/api/v1/participates/#{participate.id}", headers: @auth_tokens
+
+    expect(response.status).to eq(422)
   end
 end
