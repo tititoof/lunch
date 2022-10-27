@@ -9,7 +9,6 @@ module Api
       def create
         meal = Meal.find(places_params[:meal_id])
         place = Place.new(user: current_user, name: places_params[:name], address: places_params[:address], meal:)
-        # authorize! :add, place
 
         if place.save
           render json: PlaceSerializer.new(place)
@@ -31,6 +30,8 @@ module Api
         place.destroy
 
         render json: PlaceSerializer.new(place)
+      rescue CanCan::AccessDenied => e
+        render json: e.message, status: :unprocessable_entity
       end
 
       private

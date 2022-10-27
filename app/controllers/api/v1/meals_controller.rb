@@ -20,6 +20,8 @@ module Api
         meal = Meal.find(params[:id])
 
         render json: MealSerializer.new(meal)
+      rescue ActiveRecord::RecordNotFound => e
+        render json: e.message, status: :unprocessable_entity
       end
 
       def update
@@ -31,6 +33,8 @@ module Api
         else
           render json: meal.errors, status: :unprocessable_entity
         end
+      rescue CanCan::AccessDenied => e
+        render json: e.message, status: :unprocessable_entity
       end
 
       def destroy
@@ -40,6 +44,8 @@ module Api
         meal.destroy
 
         render json: MealSerializer.new(meal)
+      rescue CanCan::AccessDenied => e
+        render json: e.message, status: :unprocessable_entity
       end
 
       private

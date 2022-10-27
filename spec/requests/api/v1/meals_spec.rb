@@ -22,6 +22,17 @@ RSpec.describe 'Api::V1::Meal', type: :request do
     expect(response).to match_response_schema('meal')
   end
 
+  it '>> cannot create' do
+    post api_v1_meals_create_path, params: { meals: {
+      name: Faker::Internet.unique.username(specifier: 31..35),
+      day_at: Time.now
+    } }, headers: @auth_tokens
+
+    expect(response.status).to eq(422)
+    expect(JSON.parse(response.body, symbolize_names: true))
+      .to include({ name: ['name_too_long'] })
+  end
+
   it '>> show' do
     meal = FactoryBot.create(:meal)
 
@@ -31,6 +42,12 @@ RSpec.describe 'Api::V1::Meal', type: :request do
     expect(response).to match_response_schema('meal')
   end
 
+  it '>> cannot show' do
+    get '/api/v1/meals/150', headers: @auth_tokens
+
+    expect(response.status).to eq(422)
+  end
+
   it '>> update' do
     meal = FactoryBot.create(:meal, user: @current_user)
 
@@ -38,8 +55,20 @@ RSpec.describe 'Api::V1::Meal', type: :request do
       name: Faker::Internet.unique.username(specifier: 6..30),
       day_at: meal.day_at
     } }, headers: @auth_tokens
+
     expect(response.status).to eq(200)
     expect(response).to match_response_schema('meal')
+  end
+
+  it '>> cannot update' do
+    meal = FactoryBot.create(:meal)
+
+    post "/api/v1/meals/#{meal.id}/update", params: { meals: {
+      name: Faker::Internet.unique.username(specifier: 6..30),
+      day_at: meal.day_at
+    } }, headers: @auth_tokens
+
+    expect(response.status).to eq(422)
   end
 
   it '>> destroy' do
@@ -51,5 +80,13 @@ RSpec.describe 'Api::V1::Meal', type: :request do
 
     expect(response.status).to eq(200)
     expect(response).to match_response_schema('meal')
+  end
+
+  it '>> cannot destroy' do
+    meal = FactoryBot.create(:meal)
+
+    delete "/api/v1/meals/#{meal.id}", headers: @auth_tokens
+
+    expect(response.status).to eq(422)
   end
 end
